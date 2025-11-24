@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { logUserVisit, fetchUserMetrics, fetchMetricDefinitions } from "./api";
 
-// Use correct public path for logo image
+// Use the exact filename in public folder!
 const astroLogo = process.env.PUBLIC_URL + "/Astro-Logo.jpg";
 
 export default function App() {
   const [name, setName] = useState("");
   const [entered, setEntered] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [metrics, setMetrics] = useState({});
   const [definitions, setDefinitions] = useState({});
   const [loading, setLoading] = useState(false);
@@ -15,7 +16,7 @@ export default function App() {
     fetchMetricDefinitions().then(setDefinitions);
   }, []);
 
-  async function handleSubmit(e) {
+  async function handleLogin(e) {
     e.preventDefault();
     if (!name.trim()) return;
     setLoading(true);
@@ -50,102 +51,120 @@ export default function App() {
         </h1>
       </header>
 
-      {/* Add your metrics cards below */}
-      <div style={{
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        gap: "32px 24px",
-        margin: "28px 0 0 0"
-      }}>
-        {Object.keys(definitions).map(key => (
-          <div key={key} style={{
+      {!entered ? (
+        <form onSubmit={handleLogin} style={{ textAlign: "center", margin: "32px 0" }}>
+          <div style={{ fontSize: 22, fontWeight: "bold", marginBottom: 12 }}>Enter your name:</div>
+          <input
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            style={{
+              padding: "14px 16px",
+              fontSize: 15,
+              borderRadius: 8,
+              border: "2px solid #8f94fb",
+              width: 240,
+              marginBottom: 12
+            }}
+          />
+          <br />
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              padding: "14px 44px",
+              fontSize: 17,
+              background: "#4e54c8",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              marginTop: 12,
+              boxShadow: "0 2px 14px #2222"
+            }}
+          >
+            {loading ? "Loading..." : "Login"}
+          </button>
+        </form>
+      ) : (
+        <div style={{ textAlign: "center", margin: "32px 0" }}>
+          <button
+            onClick={() => setShowDashboard(true)}
+            style={{
+              padding: "14px 44px",
+              fontSize: 17,
+              background: "#222",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              marginTop: 12,
+              boxShadow: "0 2px 14px #4e54c899"
+            }}
+          >
+            View Dashboard
+          </button>
+        </div>
+      )}
+
+      {showDashboard && (
+        <>
+          <div style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: "32px 24px",
+            margin: "28px 0 0 0"
+          }}>
+            {Object.keys(definitions).map(key => (
+              <div key={key} style={{
+                background: "#fff",
+                borderRadius: 22,
+                boxShadow: "0 4px 24px #4e54c855",
+                padding: "30px 22px",
+                margin: "0 10px 28px 10px",
+                width: 280,
+                maxWidth: "94vw"
+              }}>
+                <div style={{
+                  fontWeight: "bold",
+                  fontSize: 22,
+                  color: "#4e54c8",
+                  marginBottom: 10
+                }}>
+                  {key}
+                </div>
+                <div style={{
+                  fontSize: 17,
+                  color: "#222"
+                }}>
+                  {definitions[key]}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{
+            textAlign: "center",
             background: "#fff",
             borderRadius: 22,
             boxShadow: "0 4px 24px #4e54c855",
             padding: "30px 22px",
             margin: "0 10px 28px 10px",
-            width: 280,
-            maxWidth: "94vw"
+            maxWidth: 480,
+            marginLeft: "auto",
+            marginRight: "auto"
           }}>
             <div style={{
               fontWeight: "bold",
-              fontSize: 22,
               color: "#4e54c8",
+              fontSize: 22,
               marginBottom: 10
             }}>
-              {key}
+              Results for {name}
             </div>
-            <div style={{
-              fontSize: 17,
-              color: "#222"
-            }}>
-              {definitions[key]}
-            </div>
+            <pre style={{ textAlign: "left", fontSize: 15 }}>
+              {JSON.stringify(metrics, null, 2)}
+            </pre>
           </div>
-        ))}
-      </div>
-
-      {/* Name entry section */}
-      <form onSubmit={handleSubmit} style={{ textAlign: "center", margin: "32px 0" }}>
-        <div style={{ fontSize: 22, fontWeight: "bold", marginBottom: 12 }}>Enter your name:</div>
-        <input
-          type="text"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          style={{
-            padding: "14px 16px",
-            fontSize: 15,
-            borderRadius: 8,
-            border: "2px solid #8f94fb",
-            width: 240,
-            marginBottom: 12
-          }}
-        />
-        <br />
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            padding: "14px 44px",
-            fontSize: 17,
-            background: "#4e54c8",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            marginTop: 12,
-            boxShadow: "0 2px 14px #2222"
-          }}
-        >
-          {loading ? "Loading..." : "Submit"}
-        </button>
-      </form>
-
-      {/* Results Section: show user metrics if entered */}
-      {entered && (
-        <div style={{
-          textAlign: "center",
-          background: "#fff",
-          borderRadius: 22,
-          boxShadow: "0 4px 24px #4e54c855",
-          padding: "30px 22px",
-          margin: "0 10px 28px 10px",
-          maxWidth: 480,
-          marginLeft: "auto",
-          marginRight: "auto"
-        }}>
-          <div style={{
-            fontWeight: "bold",
-            color: "#4e54c8",
-            fontSize: 22,
-            marginBottom: 10
-          }}>
-            Results for {name}
-          </div>
-          <pre style={{ textAlign: "left", fontSize: 15 }}>
-            {JSON.stringify(metrics, null, 2)}
-          </pre>
-        </div>
+        </>
       )}
     </div>
   );

@@ -8,7 +8,7 @@ export default function App() {
   const [entered, setEntered] = useState(false);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={process.env.PUBLIC_URL}>
       <Routes>
         <Route
           path="/"
